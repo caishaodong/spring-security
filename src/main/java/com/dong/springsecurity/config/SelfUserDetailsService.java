@@ -1,13 +1,16 @@
 package com.dong.springsecurity.config;
 
+import com.dong.springsecurity.model.SelfUserDetails;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -20,17 +23,59 @@ import java.util.Set;
 public class SelfUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        // 根据用户名获取到用户信息，以及用户密码信息
+        String password = "123456";
+        password = new BCryptPasswordEncoder().encode(password);
+
         //构建用户信息的逻辑(取数据库/LDAP等用户信息)
+        UserDetails userDetails = null;
+        if (username.equals("admin")) {
+            userDetails = getUserDetails(username, password);
+        } else {
+            userDetails = getUserDetails2(username, password);
+        }
+        return userDetails;
+    }
 
-        SelfUserDetails userInfo = new SelfUserDetails();
-        userInfo.setUsername(username);
-        userInfo.setPassword(new BCryptPasswordEncoder().encode("123"));
+    /**
+     * 获取 UserDetails 方法一
+     *
+     * @param username
+     * @param password
+     * @return
+     */
+    public UserDetails getUserDetails(String username, String password) {
+        SelfUserDetails selfUserDetails = new SelfUserDetails();
+        selfUserDetails.setUsername(username);
+        selfUserDetails.setPassword(password);
 
-        Set authoritiesSet = new HashSet();
-        GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_ADMIN");
-        authoritiesSet.add(authority);
-        userInfo.setAuthorities(authoritiesSet);
+        Set<GrantedAuthority> authList = getAuthorities();
+        selfUserDetails.setAuthorities(authList);
+        return selfUserDetails;
+    }
 
-        return userInfo;
+    /**
+     * 获取 UserDetails 方法二
+     *
+     * @param username
+     * @param password
+     * @return
+     */
+    public UserDetails getUserDetails2(String username, String password) {
+        Collection<GrantedAuthority> authList = getAuthorities();
+        UserDetails userDetails = new User(username, password, true, true, true, true, authList);
+        return userDetails;
+    }
+
+    /**
+     * 获取权限
+     *
+     * @return
+     */
+    private Set<GrantedAuthority> getAuthorities() {
+        Set<GrantedAuthority> authList = new HashSet<>();
+        authList.add(new SimpleGrantedAuthority("ROLE_USER"));
+        authList.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        return authList;
     }
 }

@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.dong.springsecurity.model.AjaxResponseBody;
 import com.dong.springsecurity.util.JwtTokenUtil;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
@@ -26,9 +27,9 @@ public class AjaxAuthenticationSuccessHandler implements AuthenticationSuccessHa
         responseBody.setStatus("200");
         responseBody.setMsg("Login Success!");
 
-        SelfUserDetails userDetails = (SelfUserDetails) authentication.getPrincipal();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-        String jwtToken = JwtTokenUtil.generateToken(userDetails.getUsername(), 300, "_secret");
+        String jwtToken = JwtTokenUtil.generateToken(userDetails.getUsername(), 15, "_secret");
         responseBody.setJwtToken(jwtToken);
 
         httpServletResponse.getWriter().write(JSON.toJSONString(responseBody));
