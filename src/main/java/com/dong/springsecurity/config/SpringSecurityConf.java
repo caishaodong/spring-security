@@ -63,7 +63,12 @@ public class SpringSecurityConf extends WebSecurityConfigurerAdapter {
 
         // 去掉 CSRF
         http.csrf().disable()
-                // 使用 JWT，关闭token
+                /**
+                 * ALWAYS  总是创建HttpSession
+                 * IF_REQUIRED  Spring Security只会在需要时创建一个HttpSession
+                 * NEVER  Spring Security不会创建HttpSession，但如果它已经存在，将可以使用HttpSession
+                 * STATELESS  Spring Security永远不会创建HttpSession，它不会使用HttpSession来获取SecurityContext
+                 */
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
 
@@ -74,7 +79,7 @@ public class SpringSecurityConf extends WebSecurityConfigurerAdapter {
 
                 .anyRequest()
                 // RBAC 动态 url 认证
-                .access("@rbacauthorityservice.hasPermission(request,authentication)")
+                .access("@rbacauthorityservice.hasPermission(request, authentication)")
 
                 .and()
                 //开启登录
@@ -92,7 +97,7 @@ public class SpringSecurityConf extends WebSecurityConfigurerAdapter {
 
         // 记住我
         http.rememberMe().rememberMeParameter("remember-me")
-                .userDetailsService(userDetailsService).tokenValiditySeconds(300);
+                .userDetailsService(userDetailsService).tokenValiditySeconds(60);
 
         // 无权访问 JSON 格式的数据
         http.exceptionHandling().accessDeniedHandler(accessDeniedHandler);

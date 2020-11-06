@@ -29,7 +29,7 @@ public class AjaxAuthenticationSuccessHandler implements AuthenticationSuccessHa
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-        String jwtToken = JwtTokenUtil.generateToken(userDetails.getUsername(), 15, "_secret");
+        String jwtToken = JwtTokenUtil.generateToken(userDetails.getUsername(), 60*24, "_secret");
         responseBody.setJwtToken(jwtToken);
 
         httpServletResponse.getWriter().write(JSON.toJSONString(responseBody));
